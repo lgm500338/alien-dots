@@ -3,6 +3,9 @@
   "target": {
     "namespace": "android_app",
     "package_name": "net.ideafusionlab.aliendots",
-    "sha256_cert_fingerprints": ["82:B7:37:65:06:45:64:F6:73:C3:B3:91:37:60:48:8B:82:C2:B0:AB:6D:24:5A:B4:E7:EB:37:C7:EE:3B:24:23"]
+    "sha256_cert_fingerprints": [
+      "C2:23:B5:D9:76:B1:12:5D:13:75:93:BD:AC:62:DC:9D:81:56:EB:28:45:B4:61:C7:2B:AE:1E:68:DC:40:71:52",
+      "82:B7:37:65:06:45:64:F6:73:C3:B3:91:37:60:48:8B:82:C2:B0:AB:6D:24:5A:B4:E7:EB:37:C7:EE:3B:24:23"
+    ]
   }
 }]
