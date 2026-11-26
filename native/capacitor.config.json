@@ -1,0 +1,8 @@
+{
+  "appId": "net.ideafusionlab.aliendots",
+  "appName": "외계인 닷",
+  "webDir": "www",
+  "backgroundColor": "#040815",
+  "android": { "backgroundColor": "#040815" },
+  "ios": { "backgroundColor": "#040815", "contentInset": "never" }
+}

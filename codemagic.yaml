@@ -1,0 +1,63 @@
+# 외계인 닷 앱 빌드 설정 (Codemagic 클라우드 빌드 — Mac 없이 안드로이드·아이폰 앱 만들기)
+workflows:
+  android:
+    name: 외계인 닷 Android (구글 플레이용 AAB)
+    instance_type: linux_x2
+    working_directory: native
+    environment:
+      node: 22
+      java: 21
+      android_signing:
+        - alien_dots_upload_key   # Codemagic에 올린 업로드 키 이름
+    scripts:
+      - name: 웹 파일 넣기
+        script: npm ci && node copy-web.js && npx cap sync android
+      - name: 서명 설정
+        script: |
+          cat >> "$CM_BUILD_DIR/native/android/app/build.gradle" <<'GRADLE'
+          android {
+              signingConfigs {
+                  release {
+                      storeFile file(System.getenv("CM_KEYSTORE_PATH"))
+                      storePassword System.getenv("CM_KEYSTORE_PASSWORD")
+                      keyAlias System.getenv("CM_KEY_ALIAS")
+                      keyPassword System.getenv("CM_KEY_PASSWORD")
+                  }
+              }
+              buildTypes { release { signingConfig signingConfigs.release } }
+          }
+          GRADLE
+      - name: AAB 빌드
+        script: cd android && chmod +x gradlew && ./gradlew bundleRelease
+    artifacts:
+      - native/android/app/build/outputs/bundle/release/*.aab
+
+  ios:
+    name: 외계인 닷 iOS (TestFlight)
+    instance_type: mac_mini_m2
+    working_directory: native
+    integrations:
+      app_store_connect: IdeaFusionLab   # Codemagic에 연결한 App Store Connect API 키 이름
+    environment:
+      node: 22
+      xcode: latest
+      ios_signing:
+        distribution_type: app_store
+        bundle_identifier: net.ideafusionlab.aliendots
+    scripts:
+      - name: 웹 파일 넣기
+        script: npm ci && node copy-web.js && npx cap sync ios
+      - name: 서명 프로필 적용
+        script: xcode-project use-profiles
+      - name: 빌드 번호 올리기
+        script: |
+          cd ios/App
+          agvtool new-version -all $BUILD_NUMBER
+      - name: IPA 빌드
+        script: xcode-project build-ipa --project "ios/App/App.xcodeproj" --scheme "App"
+    artifacts:
+      - build/ios/ipa/*.ipa
+    publishing:
+      app_store_connect:
+        auth: integration
+        submit_to_testflight: true
