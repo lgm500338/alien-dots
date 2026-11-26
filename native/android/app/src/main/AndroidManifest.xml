@@ -20,10 +20,10 @@
             </intent-filter>
         </activity>
 
-        <!-- 애드몹 앱 ID (지금은 구글 테스트용. 애드몹 가입 후 진짜 앱 ID로 교체) -->
+        <!-- 애드몹 앱 ID (외계인 닷 Android) -->
         <meta-data
             android:name="com.google.android.gms.ads.APPLICATION_ID"
-            android:value="ca-app-pub-3940256099942544~3347511713"
+            android:value="ca-app-pub-8091759783636411~4815652797"
         />
 
         <provider

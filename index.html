@@ -1041,14 +1041,15 @@ if ('serviceWorker' in navigator && !(window.Capacitor&&Capacitor.isNativePlatfo
 }
 </script>
 <script>
-/* ============ 광고 (앱에서만 동작, 웹사이트에서는 아무것도 안 함) ============
-   지금은 구글 공식 "테스트 광고" 번호. 애드몹 가입 후 진짜 광고 단위 번호로 바꾸고 TEST를 false로 */
+/* ============ 광고 (앱에서만 동작, 웹사이트에서는 아무것도 안 함) ============ */
 window.ADS=(function(){
   const C=window.Capacitor, native=!!(C&&C.isNativePlatform&&C.isNativePlatform());
   const A=native&&C.Plugins&&C.Plugins.AdMob; if(!A)return {native:false};
-  const IOS=C.getPlatform()==='ios', TEST=true;
+  const IOS=C.getPlatform()==='ios';
+  /* 안드로이드: 진짜 광고(애드몹 2026-11-26 생성). 아이폰: 앱스토어 등록 전이라 아직 구글 테스트 광고 */
+  const TEST=IOS;
   const ID=IOS?{banner:'ca-app-pub-3940256099942544/2435281174',reward:'ca-app-pub-3940256099942544/1712485313'}
-              :{banner:'ca-app-pub-3940256099942544/9214589741',reward:'ca-app-pub-3940256099942544/5224354917'};
+              :{banner:'ca-app-pub-8091759783636411/7754088585',reward:'ca-app-pub-8091759783636411/6548818121'};
   let ready=false,busy=false;
   async function start(){
     try{
