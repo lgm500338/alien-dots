@@ -2,7 +2,7 @@
 workflows:
   android:
     name: 외계인 닷 Android (구글 플레이용 AAB)
-    instance_type: linux_x2
+    instance_type: mac_mini_m2
     working_directory: native
     environment:
       node: 22
