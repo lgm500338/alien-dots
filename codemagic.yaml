@@ -30,7 +30,8 @@ workflows:
       - name: AAB 빌드
         script: cd android && chmod +x gradlew && ./gradlew bundleRelease
     artifacts:
-      - native/android/app/build/outputs/bundle/release/*.aab
+      - android/app/build/outputs/**/*.aab
+      - native/android/app/build/outputs/**/*.aab
 
   ios:
     name: 외계인 닷 iOS (TestFlight)
@@ -57,6 +58,7 @@ workflows:
         script: xcode-project build-ipa --project "ios/App/App.xcodeproj" --scheme "App"
     artifacts:
       - build/ios/ipa/*.ipa
+      - native/build/ios/ipa/*.ipa
     publishing:
       app_store_connect:
         auth: integration
