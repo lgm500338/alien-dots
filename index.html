@@ -604,7 +604,7 @@ const I18N={
   selSub:'차례대로 깨면 다음 스테이지가 열려요. 맨 끝에는… 아직 아무도 모르는 무언가가 기다려요.',
   locked:'🔒 앞 스테이지를 먼저 깨 주세요',jumpPh:n=>'스테이지 번호 (1~'+n+')',go:'이동',close:'닫기',
   hellTab:n=>'🔥 은하계 지옥 '+n,langBtn:'EN',
-  qTitle:'일일 도전과제',qSet:(s,a,b)=>s+'세트 · 오늘 '+a+'~'+b+'번째 레벨',qSub:n=>'오늘 <b>'+n+'</b>번째 새 레벨을 깨면 다음 보상!',qNote:'처음 깨는 레벨만 인정돼요 · 매일 자정에 새로 시작',qGot:t=>'🎁 '+t+' 받았어요!',qNewSet:'🎉 세트 완료! 다음 10레벨 도전과제가 열렸어요',aTitle:'매일 체크인',aSub:'매일 출석하고 보상을 받으세요!',aNote:'하루 빠져도 이어져요 · D10 다음엔 D1부터 다시',aGot:(d,t)=>d+' 출석 보상 '+t+' 받았어요!',aDone:'오늘 출석 완료! 내일 또 만나요',tapClose:'탭하여 닫기',tQ:'도전과제',tA:'출석',cos:'꾸미기',docTitle:'외계인 닷 · Alien Dots'},
+  qTitle:'일일 도전과제',qSet:(s,a,b)=>'오늘 새 레벨 '+a+'~'+b+'번째',qSub:n=>'오늘 <b>'+n+'</b>번째 새 레벨을 깨면 다음 보상!',qNote:'처음 깨는 레벨만 인정돼요 · 매일 자정에 새로 시작',qGot:t=>'🎁 '+t+' 받았어요!',qNewSet:'🎉 오늘 도전과제 완료! 내일 자정에 새로 시작해요',aTitle:'매일 체크인',aSub:'매일 출석하고 보상을 받으세요!',aNote:'하루 빠져도 이어져요 · D10 다음엔 D1부터 다시',aGot:(d,t)=>d+' 출석 보상 '+t+' 받았어요!',aDone:'오늘 출석 완료! 내일 또 만나요',tapClose:'탭하여 닫기',tQ:'도전과제',tA:'출석',cos:'꾸미기',docTitle:'외계인 닷 · Alien Dots'},
  en:{hint:'Hint',links:'Links',fill:'Board',moves:'Moves',stage:n=>'Stage '+n,subHell:'100% fill required',
   tipRule:'Drag to connect aliens of the same kind. Stuck? Tap 💡 Hint!',
   tipFill:n=>'Occupy 100% with no empty cells for 1 star! Collect '+n+' stars for 1 hint',
@@ -628,7 +628,7 @@ const I18N={
   selSub:'Clear stages in order to unlock the next one. Something unknown waits at the very end…',
   locked:'🔒 Clear the previous stage first',jumpPh:n=>'Stage number (1~'+n+')',go:'Go',close:'Close',
   hellTab:n=>'🔥 Galaxy Hell '+n,langBtn:'한',
-  qTitle:'Daily Challenge',qSet:(s,a,b)=>'Set '+s+' · today\'s new levels '+a+'–'+b,qSub:n=>'Clear new level <b>#'+n+'</b> today for the next reward!',qNote:'Only first-time clears count · resets at midnight',qGot:t=>'🎁 You got '+t+'!',qNewSet:'🎉 Set complete! The next 10-level challenge is open',aTitle:'Daily Check-in',aSub:'Check in every day for rewards!',aNote:'Missing a day won\'t reset it · after D10 it starts again',aGot:(d,t)=>d+' reward: '+t+'!',aDone:'Checked in today! See you tomorrow',tapClose:'Tap to close',tQ:'Challenge',tA:'Check-in',cos:'Look',docTitle:'Alien Dots'}
+  qTitle:'Daily Challenge',qSet:(s,a,b)=>'Today\'s new levels '+a+'–'+b,qSub:n=>'Clear new level <b>#'+n+'</b> today for the next reward!',qNote:'Only first-time clears count · resets at midnight',qGot:t=>'🎁 You got '+t+'!',qNewSet:'🎉 Today\'s challenge complete! A new one starts at midnight',aTitle:'Daily Check-in',aSub:'Check in every day for rewards!',aNote:'Missing a day won\'t reset it · after D10 it starts again',aGot:(d,t)=>d+' reward: '+t+'!',aDone:'Checked in today! See you tomorrow',tapClose:'Tap to close',tQ:'Challenge',tA:'Check-in',cos:'Look',docTitle:'Alien Dots'}
 };
 let LANG=store.lang||((navigator.language||'ko').toLowerCase().indexOf('ko')===0?'ko':'en');
 function L(k,...a){const s=I18N[LANG][k];return typeof s==='function'?s(...a):s;}
@@ -746,7 +746,7 @@ function checkWin(){
   let filled=0;for(let i=0;i<S.owner.length;i++)if(S.owner[i]>=0)filled++;
   const full=filled===S.owner.length;
   if(all&&(full||!S.hell)){S.won=true;if(window.ADS&&ADS.native)ADS.cleared();
-    if(S.stage>(store.maxC||0)){store.maxC=S.stage;dailyFix();store.daily.count++;const qc=store.daily.count;store.pendQ={set:Math.floor((qc-1)/10),idx:(qc-1)%10};}
+    if(S.stage>(store.maxC||0)){store.maxC=S.stage;dailyFix();if(store.daily.count<10){store.daily.count++;const qc=store.daily.count;store.pendQ={set:Math.floor((qc-1)/10),idx:(qc-1)%10};}}
     if(full&&!store.perfect[S.stage]){store.perfect[S.stage]=1;
       if(S.hell){if(store.hints<HINT_MAX){store.hints++;S.reward='hell';}else S.reward='max';}
       else{store.bank++;S.newSeg=store.bank;const got=settle(S.stage);S.reward=got?'hint':(store.hints>=HINT_MAX&&store.bank>=need(S.stage)?'max':'star');}
@@ -993,8 +993,9 @@ function renderDaily(){
   $('dTabQ').classList.toggle('on',q);$('dTabA').classList.toggle('on',!q);
   $('dToast').style.display=dly.toast?'':'none';$('dToast').textContent=dly.toast||'';
   if(q){
-    dailyFix();const c=store.daily.count;
-    const v=dly.qv||{set:Math.floor(c/10),doneN:c%10,newIdx:-1};
+    dailyFix();const c=Math.min(store.daily.count,10);
+    const v=dly.qv||{set:0,doneN:c,newIdx:-1};
+    if(v.doneN>=10&&!dly.toast){$('dToast').style.display='';$('dToast').textContent=L('qNewSet');}
     $('dTitle').textContent=L('qTitle');
     $('dSet').textContent=L('qSet',v.set+1,v.set*10+1,v.set*10+10);
     $('dSub').innerHTML=v.doneN>=10?'':L('qSub',v.set*10+v.doneN+1);
@@ -1025,11 +1026,11 @@ function afterWin(fn){
   if(window.ADS&&ADS.native)fn=ADS.wrap(fn);
   if(!store.pendQ){fn();return;}
   const q=store.pendQ;store.pendQ=null;const txt=grant(qArr(q.set)[q.idx]);
-  openDaily({mode:'quest',lock:true,qv:{set:q.set,doneN:q.idx+1,newIdx:q.idx},toast:L('qGot',txt),after:fn,setDone:q.idx===9,nextSet:q.set+1});
+  openDaily({mode:'quest',lock:true,qv:{set:q.set,doneN:q.idx+1,newIdx:q.idx},toast:L('qGot',txt),after:fn,setDone:q.idx===9});
   [0,1,2].forEach(i=>setTimeout(()=>sfx.note(i*2+7),200+i*120));
 }
 function closeDaily(){
-  if(dly.setDone){dly.setDone=false;dly.qv={set:dly.nextSet,doneN:0,newIdx:-1};dly.toast=L('qNewSet');renderDaily();sfx.fanfare();return;}
+  if(dly.setDone){dly.setDone=false;dly.qv={set:0,doneN:10,newIdx:-1};dly.toast=L('qNewSet');renderDaily();sfx.fanfare();return;}
   $('ovDaily').classList.remove('show');const f=dly.after;dly={};if(f)f();
 }
 $('dClose').onclick=closeDaily;$('dX').onclick=closeDaily;
