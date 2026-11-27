@@ -593,7 +593,7 @@ const I18N={
   tipHell:'은하계 지옥: 모든 외계인을 연결하고 빈칸 없이 100% 채워야 클리어!',
   hellAllConn:'모두 연결했어요! 지옥에서는 빈칸까지 100% 채워야 클리어예요.',
   noHint:'힌트가 없어요. 빈칸 없이 100% 점유해서 별을 모아 보세요!',
-  adTitle:'힌트가 없어요',adSub:'짧은 광고를 보면 힌트 1개를 바로 받아요. 100% 점유로 별을 모아도 힌트가 생겨요.',adWatch:'광고 보고 힌트 받기',adWait:'광고를 불러오는 중이에요…',frTitle:'오늘 하루 광고 없이!',frSub:'광고 하나만 보면 오늘 밤 12시까지 아래 광고가 사라져요.',frNo:'괜찮아요',frWatch:'광고 보고 광고 없이 하기',frDone:'오늘 밤 12시까지 광고 없이 즐기세요!',
+  adTitle:'힌트가 없어요',adSub:'짧은 광고를 보면 힌트 1개를 바로 받아요. 100% 점유로 별을 모아도 힌트가 생겨요.',adWatch:'광고 보고 힌트 받기',adWait:'광고를 불러오는 중이에요…',frTitle:'오늘 하루 광고 없이!',frSub:'광고 하나만 보면 오늘 밤 12시까지 모든 광고가 사라져요. (3판마다 나오는 광고와 아래 광고 모두)',frNo:'괜찮아요',frWatch:'광고 보고 광고 없이 하기',frDone:'오늘 밤 12시까지 광고 없이 즐기세요!',
   hintUsed:'외계인이 길을 알려줬어요! 이 경로는 정답의 일부예요.',
   cleared:n=>'스테이지 '+n+' 클리어!',winFull:'신호 연결 완료!',winOk:'신호 연결 성공!',
   winSubHell:'은하계 지옥을 빈틈없이 채웠어요. 정말 대단해요!',winSub:'모든 외계인 친구들의 통신 신호가 연결되었습니다!',
@@ -617,7 +617,7 @@ const I18N={
   tipHell:'Galaxy Hell: connect every alien AND fill 100% of the board to clear!',
   hellAllConn:'All connected! In Galaxy Hell you must also fill every empty cell.',
   noHint:'No hints left. Occupy a board 100% to collect stars!',
-  adTitle:'No hints left',adSub:'Watch a short ad to get 1 hint right away. You can also earn hints by filling boards 100%.',adWatch:'Watch ad for a hint',adWait:'Loading the ad…',frTitle:'Ad-free for today!',frSub:'Watch one ad and the banner disappears until midnight tonight.',frNo:'No thanks',frWatch:'Watch ad, go ad-free',frDone:'No ads until midnight. Enjoy!',
+  adTitle:'No hints left',adSub:'Watch a short ad to get 1 hint right away. You can also earn hints by filling boards 100%.',adWatch:'Watch ad for a hint',adWait:'Loading the ad…',frTitle:'Ad-free for today!',frSub:'Watch one ad and all ads disappear until midnight tonight, including the ad every 3 levels and the banner.',frNo:'No thanks',frWatch:'Watch ad, go ad-free',frDone:'No ads until midnight. Enjoy!',
   hintUsed:'An alien showed you the way! This path is part of the solution.',
   cleared:n=>'Stage '+n+' cleared!',winFull:'Perfect link!',winOk:'Signal connected!',
   winSubHell:'You filled Galaxy Hell without a single gap. Amazing!',winSub:'All your alien friends are connected!',
@@ -1023,7 +1023,7 @@ function checkAtt(after){
 /* 레벨 클리어 후: 도전과제 칸 체크 → 보상 */
 function afterWin(fn){
   $('ovWin').classList.remove('show');
-  if(window.ADS&&ADS.native)fn=ADS.wrap(fn);
+  if(window.ADS&&ADS.native)fn=ADS.wrap(fn,!!store.pendQ);
   if(!store.pendQ){fn();return;}
   const q=store.pendQ;store.pendQ=null;const txt=grant(qArr(q.set)[q.idx]);
   openDaily({mode:'quest',lock:true,qv:{set:q.set,doneN:q.idx+1,newIdx:q.idx},toast:L('qGot',txt),after:fn,setDone:q.idx===9});
@@ -1056,8 +1056,8 @@ window.ADS=(function(){
   const IOS=C.getPlatform()==='ios';
   /* 안드로이드: 진짜 광고(애드몹 2026-11-26 생성). 아이폰: 앱스토어 등록 전이라 아직 구글 테스트 광고 */
   const TEST=IOS;
-  const ID=IOS?{banner:'ca-app-pub-3940256099942544/2435281174',reward:'ca-app-pub-3940256099942544/1712485313'}
-              :{banner:'ca-app-pub-8091759783636411/7754088585',reward:'ca-app-pub-8091759783636411/6548818121'};
+  const ID=IOS?{banner:'ca-app-pub-3940256099942544/2435281174',reward:'ca-app-pub-3940256099942544/1712485313',full:'ca-app-pub-3940256099942544/4411468910'}
+              :{banner:'ca-app-pub-8091759783636411/7754088585',reward:'ca-app-pub-8091759783636411/6548818121',full:'INTERSTITIAL_ID'};
   let ready=false,busy=false,banner=false;
   /* 오늘 하루 광고 없이: 들어올 때마다 3단계를 깨면 한 번 물어봄 (오늘 이미 받았으면 안 물어봄) */
   let clears=0,asked=false,hiddenAt=0;
@@ -1065,13 +1065,21 @@ window.ADS=(function(){
   async function showB(){if(banner||free())return;banner=true;try{await A.showBanner({adId:ID.banner,adSize:'ADAPTIVE_BANNER',position:'BOTTOM_CENTER',margin:0,isTesting:TEST});}catch(e){banner=false;}}
   async function hideB(){banner=false;try{await A.removeBanner();}catch(e){}document.documentElement.style.setProperty('--adh','0px');window.dispatchEvent(new Event('resize'));}
   function midnight(){const n=new Date(),m=new Date(n.getFullYear(),n.getMonth(),n.getDate()+1,0,0,5);setTimeout(()=>{if(!free())showB();},m-n);}
-  function cleared(){clears++;}
-  function wrap(fn){return ()=>{if(clears>=3&&!asked&&!free()){asked=true;$('ovFree').classList.add('show');after=fn;}else fn();};}
+  function cleared(){clears++;if(asked)since++;}
+  /* 제안을 본 뒤(괜찮아요)부터는 3판마다 전면 광고 (도전과제 창을 닫은 뒤에 나옴) */
+  let since=0,fullReady=false;
+  async function loadFull(){if(!ID.full||ID.full.indexOf('ca-app-pub')<0)return;try{await A.prepareInterstitial({adId:ID.full,isTesting:TEST});fullReady=true;}catch(e){fullReady=false;}}
+  async function showFull(fn){since=0;if(fullReady&&!busy){busy=true;fullReady=false;try{await A.showInterstitial();}catch(e){}busy=false;loadFull();}fn();}
+  function wrap(fn,popup){return ()=>{
+    if(free()){fn();return;}
+    if(clears>=3&&!asked){asked=true;$('ovFree').classList.add('show');after=fn;return;}
+    if(asked&&since>=3){showFull(fn);return;}
+    fn();};}
   let after=null;
   function closeFree(){$('ovFree').classList.remove('show');const f=after;after=null;if(f)f();}
   document.addEventListener('visibilitychange',()=>{
     if(document.hidden){hiddenAt=Date.now();return;}
-    if(hiddenAt&&Date.now()-hiddenAt>30*60*1000){clears=0;asked=false;} /* 30분 넘게 나갔다 오면 새로 들어온 걸로 침 */
+    if(hiddenAt&&Date.now()-hiddenAt>30*60*1000){clears=0;asked=false;since=0;} /* 30분 넘게 나갔다 오면 새로 들어온 걸로 침 */
     if(free())hideB();else showB();
   });
   async function start(){
@@ -1081,7 +1089,7 @@ window.ADS=(function(){
       A.addListener('bannerAdSizeChanged',sz=>{document.documentElement.style.setProperty('--adh',((sz&&sz.height)||0)+'px');window.dispatchEvent(new Event('resize'));});
       if(free())midnight();else await showB();
     }catch(e){}
-    load();
+    load();loadFull();
   }
   async function load(){try{await A.prepareRewardVideoAd({adId:ID.reward,isTesting:TEST});ready=true;}catch(e){ready=false;}}
   function give(){store.hints++;save();hud();useHint();}
